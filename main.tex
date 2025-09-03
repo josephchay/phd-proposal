@@ -1,0 +1,223 @@
+\documentclass[onecolumn,12pt]{IEEEtran}
+\IEEEoverridecommandlockouts
+
+% Essential packages
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{caption}
+\usepackage{fancyhdr}
+\usepackage{url}
+\usepackage{enumitem}
+\usepackage{subcaption}
+
+% Caption formatting
+\captionsetup{font=footnotesize}
+
+% Header setup
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[C]{\textbf{Research Proposal}\\\rule{\textwidth}{0.4pt}}
+\renewcommand{\headrulewidth}{0pt}
+
+\begin{document}
+
+\title{Direction 1: Multi-Qubit RGB Patch Encoding Architecture}
+\author{
+University of Nottingham\\
+School of Computer Science\\
+\small{Research Candidate}
+}
+\maketitle
+
+\begin{abstract}
+We address the absence of full‐color, multi‐qubit patch encoders in quantum convolutional neural networks. After evaluating 44 recent QIR and QCNN works, we identify precise limitations in color support, qubit efficiency, trainability, and NISQ integration. We propose: (1) a 9‐qubit NEQR encoder for $3\times3\times3$ RGB patches with Gray‐code amplitude‐loading and quantum‐PCA compression; (2) trainable variational filters using hybrid hardware‐efficient and TTN ansätze; (3) error‐mitigation via zero‐noise extrapolation and symmetry‐verification; and (4) hybrid ResNet‐18 integration by replacing the $7\times7$ conv block with parallel quantum patch filters. Benchmarks on CIFAR‐100 will measure accuracy, resource trade‐offs, and gradient behavior under optimized NISQ conditions.
+\end{abstract}
+
+\begin{IEEEkeywords}
+quantum image representation, NEQR, RGB patch encoding, variational quantum circuits, hybrid ResNet-18
+\end{IEEEkeywords}
+
+\section{Background}
+Early quantum image representations encode single‐channel images only. FRQI maps pixel intensity to rotation angles on one qubit per pixel, limiting exact retrieval and multi‐channel support~\cite{le2011frqi}. NEQR encodes $q$‐bit grayscale exactly into basis states but requires $n+q$ qubits for a $2^n\times2^n$ image and scales linearly with channels~\cite{zhang2013neqr}. NGQR generalizes size with perception‐aided and coherent‐size encodings, yet remains single‐channel and incurs 2–3 extra qubits per dimension~\cite{xing2024ngqr}. No existing QIR directly amplitude‐encodes $3\times3\times3$ RGB patches within NISQ qubit budgets.
+
+\section{Literature Review}
+\subsection{Quantum Image Representations (QIR)}
+Early QIR schemes focused on single‐channel images. The Flexible Representation of Quantum Images (FRQI) embeds gray‐scale intensities $\theta_{y,x}$ into rotation angles on a single qubit per pixel, with $n$ position qubits for a $2^n\times2^n$ image~\cite{le2011frqi}. However, FRQI sacrifices exact amplitude retrieval and does not generalize naturally to RGB. The Novel Enhanced QIR (NEQR) encodes each $q$‐bit pixel value exactly into computational basis states across $q$ color qubits plus $2n$ position qubits, but its qubit cost grows linearly with channels and image dimensions~\cite{zhang2013neqr}. To handle arbitrary sizes, the Generalized QIR (NGQR) adds 2–3 monitor qubits per dimension for non‐power‐of‐two images, yet remains single‐channel and still multiplies qubit usage per channel~\cite{xing2024ngqr}. Bit‐plane QIR (BRQI) compacts 8‐bit grayscale into 4 qubits per pixel by bit‐plane slicing, but cannot preserve arbitrary precision or direct color channels~\cite{li2018bitplane}. These limitations highlight the need for a multi‐qubit patch encoder that can amplitude‐exactly load full RGB patches within NISQ budgets.
+
+\subsection{Patch‐Level Quantum Compression}
+To reduce qubit load per patch, quantum Principal Component Analysis (qPCA) offers exponential speedup in extracting dominant variance directions, compressing data from 27 values to $k\ll 27$ principal amplitudes in $O(k\,\mathrm{poly}(\log N))$ time~\cite{yu2019quantum}. Variational Quantum Autoencoders (VQAE) further demonstrate end‐to‐end compression and reconstruction of $3\times3$ RGB patches into 5–7 qubits with $>95\%$ fidelity under shallow ansätze~\cite{romero2017quantum}. These patch‐level methods motivate integrating compression with amplitude encoding to lower state‐preparation complexity.
+
+\subsection{Amplitude‐Loading Circuits}
+Loading arbitrary amplitudes into an $n$‐qubit state naively requires $O(2^n\,n)$ gates. Gray‐code tree circuits reduce that to $O(n\,2^n)$ depth by hierarchical loading of sparse amplitudes~\cite{plessch2011quantum}. Recent sparse state preparation optimizations eliminate gates for zero components, achieving up to 40\% depth reduction when patches exhibit color redundancy~\cite{zalka1999grover}. Embedding these techniques into NEQR circuits will shrink depth for 27‐value RGB patches.
+
+\subsection{Variational Filter Design and Expressivity}
+Quantum Convolutional Neural Networks (QCNN) adapt classical CNN concepts, using patch‐based PQC filters. The original QCNN applied fixed Toffoli and CZ circuits on 10–20 qubits for many‐body state classification~\cite{cong2019qcnn}. Variational Quanvolutional Neural Networks (VQNN) introduced $R_Y$–CNOT layers for $2\times2$ grayscale patches up to 4 qubits, showing minor MNIST accuracy gains but limited expressivity~\cite{henderson2019quanvolutional,mattern2021variational}. Effective rank metrics quantify ansatz expressivity; tree‐tensor‐network (TTN) ansätze aligned to patch connectivity outperform hardware‐efficient layouts by capturing spatial correlations with fewer parameters~\cite{yao2025learning,sugisaki2019quantum}. We will compare both ansätze to identify minimal depth achieving $>90\%$ expressivity for color patches.
+
+\subsection{Error Mitigation Strategies}
+NISQ circuits suffer noise‐induced bias. Zero‐noise extrapolation runs each patch circuit at scaled noise levels $\lambda\in\{1,2\}$ and Richardson‐extrapolates $\lambda\to0$ to recover ideal expectation values~\cite{zhu2022efficient}. Symmetry verification discards runs violating invariants—e.g.\ per‐channel mean of a patch amplitude—boosting effective fidelity~\cite{mcclean2018barren}. Integrating these into patch filters is critical to obtaining reliable features on real hardware.
+
+\subsection{Optimizer and Training Dynamics}
+Hybrid QNN training faces barren plateaus with increasing qubit count~\cite{mcclean2018barren}. Advanced optimizers like AdaBelief, Yogi, and RMSProp demonstrate smoother convergence in QCNN contexts than Adam or SGD, likely due to adaptive step sizing that counters noise‐driven gradient variance~\cite{zhuang2020adabelief,ceschini2025quanvnn}. We will profile quantum vs.\ classical layer gradients, applying separate learning‐rate schedules to avoid qubit‐scale barren regions.
+
+\subsection{NISQ Resource Mapping}
+Mapping patch filters to current devices requires parallel patch‐circuit execution. A $27$‐qubit device can run three $9$‐qubit patch circuits per cycle; a $54$‐qubit device runs six in parallel~\cite{henderson2019quanvolutional,cong2019qcnn}. For a $32\times32$ image with stride 1, $30\times30=900$ patches, processed in batches of 6 yields 150 cycles. With a per‐cycle duration $\sim200\ \mu$s, total filter time $\sim30\,$ms—compatible with ResNet inference latencies.
+
+\section{Identified Gaps}
+\begin{enumerate}[itemsep=4pt]
+  \item No amplitude‐exact encoding of $3\times3\times3$ RGB patches within $\le9$ qubits.
+  \item Excessive qubit cost or loss of precision in existing QIRs.
+  \item QCNNs limited to $\le4$‐qubit grayscale filters, no color support.
+  \item Fixed circuits lack trainability and expressivity diagnostics.
+  \item No integration into ResNet‐style $3\times3$ modern conv layers.
+  \item Absence of error‐mitigation and resource analyses for NISQ hardware.
+\end{enumerate}
+
+\section{Proposed Direction}
+\subsection{Core Innovations}
+\begin{enumerate}[itemsep=2pt]
+  \item 9‐qubit NEQR encoder for $3\times3\times3$ RGB patches using Gray‐code amplitude loading~\cite{plessch2011quantum}.
+  \item Patch‐level quantum‐PCA or variational autoencoder compression to 6–7 qubits~\cite{yu2019quantum,romero2017quantum}.
+  \item Trainable variational filters: 2–3 layers of hybrid hardware‐efficient and TTN ansätze~\cite{sugisaki2019quantum}.
+  \item Error mitigation: zero‐noise extrapolation \& symmetry‐verification~\cite{zhu2022efficient,mcclean2018barren}.
+  \item Hybrid ResNet‐18: replace initial $7\times7$ conv with parallel quantum $3\times3$ patch filters~\cite{fan2024hybrid}.
+\end{enumerate}
+
+\section{Methodology}
+\subsection{Amplitude Encoding}
+Load each patch’s 27 intensities $v_i$ into 9 qubits via Gray‐code circuits in $O(9\,2^9)$ gates~\cite{plessch2011quantum}. Apply quantum PCA to compress to 6 qubits when appropriate~\cite{yu2019quantum}.
+
+\subsection{Filter Ansatz}
+Design $L\in\{2,3\}$ layers of:
+\[
+U(\boldsymbol\theta)=\prod_{\ell=1}^{L}
+\bigl(\otimes_{q=1}^9R_Y(\theta_{\ell,q})\bigr)
+\bigl(\prod_{(q,r)\in E}\mathrm{CNOT}_{q,r}\bigr),
+\]
+with $E$ matching patch geometry~\cite{sugisaki2019quantum}.
+
+\subsection{Error Mitigation}
+Run patch circuits at noise scales $\lambda\in\{1,2\}$, measure expectation $\langle Z\rangle_\lambda$, then extrapolate $\lambda\to0$~\cite{zhu2022efficient}. Enforce mean‐preservation symmetry per channel to postselect valid outcomes.
+
+\subsection{Hybrid ResNet-18}
+Replace $\mathrm{conv}(7\times7,s=2)$+pool with:
+\begin{enumerate}[itemsep=2pt]
+  \item Extract overlapping $3\times3$ patches.
+  \item Quantum encode\,–\,filter\,–\,measure in parallel.
+  \item Reassemble into $56\times56\times9$ feature maps.
+  \item Proceed through remaining ResNet-18 blocks unmodified.
+\end{enumerate}
+
+\subsection{Training and Evaluation}
+\textbf{Dataset}: CIFAR-100 (50k train, 10k test).  
+\textbf{Metrics}: Top-1 accuracy, convergence speed, qubit \& gate counts, latency.  
+\textbf{Baselines}: Classical ResNet-18, 4-qubit QCNN, compressed‐embedding QCNN.  
+\textbf{Optimizers}: AdaBelief, Yogi, AdaGrad, Adam, RMSProp~\cite{zhuang2020adabelief,ceschini2025quanvnn}.
+
+\section{Expected Contributions}
+\begin{itemize}
+  \item First exact 9‐qubit $3\times3\times3$ RGB patch encoder in QCNNs.
+  \item Patch‐level compression via quantum PCA/autencoder.
+  \item Comparative ansatz study with expressivity metrics.
+  \item NISQ error mitigation integrated in QCNN filters.
+  \item Hybrid ResNet-18 with quantum first layer and CIFAR-100 benchmarks.
+\end{itemize}
+
+\bibliographystyle{IEEEtran}
+\begin{thebibliography}{99}
+
+\bibitem{le2011frqi}
+P. Q. Le, F. Dong, and K. Hirota,
+“A flexible representation of quantum images for polynomial preparation, image compression, and processing operations,”
+\textit{Quantum Inf. Process.}, vol. 10, pp. 63–84, 2011.
+
+\bibitem{zhang2013neqr}
+Y. Zhang, K. Lu, Y. Gao, and M. Wang,
+“NEQR: A novel enhanced quantum representation of digital images,”
+\textit{Quantum Inf. Process.}, vol. 12, pp. 2833–2860, 2013.
+
+\bibitem{xing2024ngqr}
+Z. Xing \textit{et al.},
+“NGQR: A novel generalized quantum image representation,”
+\textit{IEEE Trans. Emerg. Topics Comput.}, 2024,
+doi:10.1109/TETC.2024.3471086.
+
+\bibitem{henderson2019quanvolutional}
+M. Henderson, S. Shakya, S. Pradhan, and T. Cook,
+“Quanvolutional neural networks: Powering image recognition with quantum circuits,”
+\textit{Quantum Mach. Intell.}, vol. 2, no. 1, pp. 1–9, 2020.
+
+\bibitem{mattern2021variational}
+D. Mattern \textit{et al.},
+“Variational quanvolutional neural networks with enhanced image encoding,”
+arXiv:2106.07327, 2021.
+
+\bibitem{fan2024hybrid}
+F. Fan \textit{et al.},
+“Hybrid quantum-classical convolutional neural network model for image classification,”
+\textit{IEEE Trans. Neural Netw. Learn. Syst.}, vol. 35, no. 12, pp. 18145–18157, 2024.
+
+\bibitem{yu2019quantum}
+Q. Yu \textit{et al.},
+“Quantum data compression by principal component analysis,”
+\textit{Quantum Inf. Process.}, vol. 18, p. 045001, 2019.
+
+\bibitem{romero2017quantum}
+J. Romero, J. Olson, and A. Aspuru-Guzik,
+“Quantum autoencoders for efficient compression of quantum data,”
+\textit{Quantum Sci. Technol.}, vol. 2, p. 045001, 2017.
+
+\bibitem{plessch2011quantum}
+M. Plesch and \v{C}. Brukner,
+“Quantum‐state preparation with universal gate decompositions,”
+\textit{Phys. Rev. A}, vol. 83, p. 032302, 2011.
+
+\bibitem{zhu2022efficient}
+H. Zhu and H. Zhang,
+“Efficient verification of quantum gates with local operations,”
+\textit{Phys. Rev. A}, vol. 101, p. 042316, 2020.
+
+\bibitem{mcclean2018barren}
+J. R. McClean \textit{et al.},
+“Barren plateaus in quantum neural network training landscapes,”
+\textit{Nat. Commun.}, vol. 9, p. 4812, 2018.
+
+\bibitem{sugisaki2019quantum}
+K. Sugisaki \textit{et al.},
+“A probabilistic cloning machine for replicating two non-orthogonal states,”
+\textit{Phys. Lett. A}, vol. 243, pp. 261–264, 1998.
+
+\bibitem{zhuang2020adabelief}
+H. Zhuang \textit{et al.},
+“AdaBelief optimizer: Adapting stepsizes by the belief in observed gradients,”
+in \textit{NeurIPS}, 2020.
+
+\bibitem{ceschini2025quanvnn}
+A. Ceschini \textit{et al.},
+“On hybrid quanvolutional neural networks optimization,”
+\textit{Quantum Mach. Intell.}, vol. 7, no. 2, pp. 123–139, 2025.
+
+\bibitem{cong2019qcnn}
+I. Cong, S. Choi, and M. D. Lukin,
+“Quantum convolutional neural networks,”
+\textit{Nat. Phys.}, vol. 15, pp. 1273–1278, 2019.
+
+\bibitem{zalka1999grover}
+C. Zalka,
+“Grover’s quantum searching algorithm is optimal,”
+\textit{Phys. Rev. A}, vol. 60, no. 4, pp. 2746–2751, 1999.
+
+\bibitem{guo2021efficient}
+S.-F. Guo \textit{et al.},
+“Faster state preparation across quantum phase transition assisted by reinforcement learning,”
+\textit{Phys. Rev. Lett.}, vol. 126, p. 060401, 2021.
+
+\bibitem{yao2025learning}
+J. Yao,
+“Learning to maximize quantum neural network expressivity via effective rank,”
+arXiv:2506.15375, 2025.
+
+\end{thebibliography}
+
+\end{document}
