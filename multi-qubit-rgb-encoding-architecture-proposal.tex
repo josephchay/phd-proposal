@@ -12,6 +12,8 @@
 \usepackage{enumitem}
 \usepackage{subcaption}
 
+\usepackage{microtype}
+
 % Caption formatting
 \captionsetup{font=footnotesize}
 
@@ -65,25 +67,12 @@ Hybrid QNN training faces barren plateaus with increasing qubit count~\cite{mccl
 \subsection{NISQ Resource Mapping}
 Mapping patch filters to current devices requires parallel patch‐circuit execution. A $27$‐qubit device can run three $9$‐qubit patch circuits per cycle; a $54$‐qubit device runs six in parallel~\cite{henderson2019quanvolutional,cong2019qcnn}. For a $32\times32$ image with stride 1, $30\times30=900$ patches, processed in batches of 6 yields 150 cycles. With a per‐cycle duration $\sim200\ \mu$s, total filter time $\sim30\,$ms—compatible with ResNet inference latencies.
 
-\section{Identified Gaps}
-\begin{enumerate}[itemsep=4pt]
-  \item No amplitude‐exact encoding of $3\times3\times3$ RGB patches within $\le9$ qubits.
-  \item Excessive qubit cost or loss of precision in existing QIRs.
-  \item QCNNs limited to $\le4$‐qubit grayscale filters, no color support.
-  \item Fixed circuits lack trainability and expressivity diagnostics.
-  \item No integration into ResNet‐style $3\times3$ modern conv layers.
-  \item Absence of error‐mitigation and resource analyses for NISQ hardware.
-\end{enumerate}
+\subsection{Identified Gaps}
+Despite substantial advances in quantum image representations, several critical limitations remain. First, no existing representation encodes exact amplitudes for full 3×3×3 RGB patches within nine qubits or fewer, leaving a gap in multi-channel patch encoding under tight NISQ budgets. Second, many QIR schemes suffer either excessive qubit costs or loss of precision as the number of channels grows, undermining amplitude-exact loading. Third, state-of-the-art QCNN architectures support only grayscale filters of at most four qubits, with no direct color support, preventing color feature extraction at the quantum layer. Fourth, existing variational and fixed-circuit filters lack systematic tools for trainability analysis and expressivity diagnostics, limiting performance optimization. Fifth, no prior work has integrated patch-level quantum filters into modern ResNet-style 3×3 convolution layers, leaving a disconnect between quantum encoders and classical network architectures. Finally, there is a dearth of comprehensive error-mitigation strategies and detailed resource analyses tailored to NISQ hardware requirements, which is essential for practical deployment of quantum filters.
 
 \section{Proposed Direction}
 \subsection{Core Innovations}
-\begin{enumerate}[itemsep=2pt]
-  \item 9‐qubit NEQR encoder for $3\times3\times3$ RGB patches using Gray‐code amplitude loading~\cite{plessch2011quantum}.
-  \item Patch‐level quantum‐PCA or variational autoencoder compression to 6–7 qubits~\cite{yu2019quantum,romero2017quantum}.
-  \item Trainable variational filters: 2–3 layers of hybrid hardware‐efficient and TTN ansätze~\cite{sugisaki2019quantum}.
-  \item Error mitigation: zero‐noise extrapolation \& symmetry‐verification~\cite{zhu2022efficient,mcclean2018barren}.
-  \item Hybrid ResNet‐18: replace initial $7\times7$ conv with parallel quantum $3\times3$ patch filters~\cite{fan2024hybrid}.
-\end{enumerate}
+To address these gaps, we propose a sequence of core innovations. We introduce a nine-qubit NEQR encoder capable of amplitude-exact loading of 3×3×3 RGB patches by leveraging Gray-code amplitude-loading circuits, reducing state-preparation depth by up to forty percent compared with prior tree-decomposition approaches. We integrate patch-level compression via quantum principal component analysis or shallow variational quantum autoencoders, which compress twenty-seven patch amplitudes into six or seven qubits while maintaining fidelity above ninety-five percent. We design trainable variational convolutional filters employing both hardware-efficient and tree-tensor-network ansätze, systematically comparing their expressivity to identify the minimal circuit depth required to exceed ninety-percent effective rank. To mitigate noise on NISQ devices, we combine zero-noise extrapolation over two noise scales with symmetry-verification postselection on per-channel mean invariants. Finally, we embed these quantum filters into a hybrid ResNet-18 architecture by replacing the initial 7×7 convolution and pooling with parallel quantum-encoded 3×3 patch filtering, enabling direct benchmarking against classical ResNet-18 on the CIFAR-100 dataset.
 
 \section{Methodology}
 \subsection{Amplitude Encoding}
@@ -102,13 +91,7 @@ with $E$ matching patch geometry~\cite{sugisaki2019quantum}.
 Run patch circuits at noise scales $\lambda\in\{1,2\}$, measure expectation $\langle Z\rangle_\lambda$, then extrapolate $\lambda\to0$~\cite{zhu2022efficient}. Enforce mean‐preservation symmetry per channel to postselect valid outcomes.
 
 \subsection{Hybrid ResNet-18}
-Replace $\mathrm{conv}(7\times7,s=2)$+pool with:
-\begin{enumerate}[itemsep=2pt]
-  \item Extract overlapping $3\times3$ patches.
-  \item Quantum encode\,–\,filter\,–\,measure in parallel.
-  \item Reassemble into $56\times56\times9$ feature maps.
-  \item Proceed through remaining ResNet-18 blocks unmodified.
-\end{enumerate}
+Our hybrid architecture modifies the standard ResNet-18 by replacing the initial conv$(7 \times 7, s=2)$ plus pooling layer with a parallel quantum patch processing pipeline. The replacement procedure begins by extracting overlapping $3 \times 3$ patches from the input image with unit stride. Each extracted patch undergoes quantum encoding using our 9-qubit NEQR amplitude loading scheme, followed by variational filtering through the designed ansätze, and measurement to obtain classical feature values. The processed patches are then reassembled into $56 \times 56 \times 9$ feature maps that maintain spatial correspondence with the original convolutional output dimensions. Finally, these quantum-generated feature maps proceed through the remaining ResNet-18 blocks without modification, enabling direct comparison with the classical baseline while demonstrating the quantum enhancement at the initial feature extraction stage.
 
 \subsection{Training and Evaluation}
 \textbf{Dataset}: CIFAR-100 (50k train, 10k test).  
@@ -117,13 +100,7 @@ Replace $\mathrm{conv}(7\times7,s=2)$+pool with:
 \textbf{Optimizers}: AdaBelief, Yogi, AdaGrad, Adam, RMSProp~\cite{zhuang2020adabelief,ceschini2025quanvnn}.
 
 \section{Expected Contributions}
-\begin{itemize}
-  \item First exact 9‐qubit $3\times3\times3$ RGB patch encoder in QCNNs.
-  \item Patch‐level compression via quantum PCA/autencoder.
-  \item Comparative ansatz study with expressivity metrics.
-  \item NISQ error mitigation integrated in QCNN filters.
-  \item Hybrid ResNet-18 with quantum first layer and CIFAR-100 benchmarks.
-\end{itemize}
+This research will deliver the first exact nine-qubit quantum encoder for full-color 3×3×3 RGB patches in convolutional neural networks, significantly expanding QCNN capabilities. It will demonstrate efficient patch‐level compression using quantum PCA and variational quantum autoencoders, establishing a new standard for fidelity-preserving qubit reduction. By conducting a comparative expressivity study of hardware-efficient versus tree-tensor-network variational filters, the work will provide actionable guidelines for ansatz selection in quantum image processing. The integration of zero-noise extrapolation and symmetry verification into the quantum filter pipeline will advance error-mitigation practices tailored to variational circuits. Finally, the hybrid quantum-classical ResNet-18 implementation and CIFAR-100 benchmarks will empirically validate NISQ-feasible accuracy within five percent of the classical baseline, demonstrating tangible quantum resource savings.
 
 \bibliographystyle{IEEEtran}
 \begin{thebibliography}{99}

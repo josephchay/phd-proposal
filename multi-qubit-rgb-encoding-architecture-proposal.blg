@@ -26,7 +26,6 @@ Warning--I didn't find a database entry for "zhu2022efficient"
 Warning--I didn't find a database entry for "mcclean2018barren"
 Warning--I didn't find a database entry for "zhuang2020adabelief"
 Warning--I didn't find a database entry for "ceschini2025quanvnn"
-Warning--I didn't find a database entry for "fan2024hybrid"
 -- IEEEtran.bst version 1.14 (2015/08/26) by Michael Shell.
 -- http://www.michaelshell.org/tex/ieeetran/bibtex/
 -- See the "IEEEtran_bst_HOWTO.pdf" manual for usage information.
@@ -34,7 +33,7 @@ Warning--I didn't find a database entry for "fan2024hybrid"
 Done.
 You've used 0 entries,
             4087 wiz_defined-function locations,
-            838 strings with 7652 characters,
+            837 strings with 7639 characters,
 and the built_in function-call counts, 104 in all, are:
 = -- 0
 > -- 0
