@@ -1,9 +1,9 @@
 This is BibTeX, Version 0.99d
 Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
-The top-level auxiliary file: main.aux
+The top-level auxiliary file: multi-qubit-rgb-encoding-architecture-proposal.aux
 Reallocating 'name_of_file' (item size: 1) to 9 items.
 The style file: IEEEtran.bst
-I found no \bibdata command---while reading file main.aux
+I found no \bibdata command---while reading file multi-qubit-rgb-encoding-architecture-proposal.aux
 Reallocating 'singl_function' (item size: 4) to 100 items.
 Reallocating 'singl_function' (item size: 4) to 100 items.
 Reallocating 'singl_function' (item size: 4) to 100 items.
@@ -13,21 +13,20 @@ Warning--I didn't find a database entry for "le2011frqi"
 Warning--I didn't find a database entry for "zhang2013neqr"
 Warning--I didn't find a database entry for "xing2024ngqr"
 Warning--I didn't find a database entry for "li2018bitplane"
-Warning--I didn't find a database entry for "henderson2019quanvolutional"
-Warning--I didn't find a database entry for "mattern2021variational"
-Warning--I didn't find a database entry for "fan2024hybrid"
 Warning--I didn't find a database entry for "yu2019quantum"
 Warning--I didn't find a database entry for "romero2017quantum"
 Warning--I didn't find a database entry for "plessch2011quantum"
 Warning--I didn't find a database entry for "zalka1999grover"
+Warning--I didn't find a database entry for "cong2019qcnn"
+Warning--I didn't find a database entry for "henderson2019quanvolutional"
+Warning--I didn't find a database entry for "mattern2021variational"
+Warning--I didn't find a database entry for "yao2025learning"
+Warning--I didn't find a database entry for "sugisaki2019quantum"
 Warning--I didn't find a database entry for "zhu2022efficient"
 Warning--I didn't find a database entry for "mcclean2018barren"
-Warning--I didn't find a database entry for "sugisaki2019quantum"
-Warning--I didn't find a database entry for "guo2021efficient"
-Warning--I didn't find a database entry for "yao2025learning"
-Warning--I didn't find a database entry for "ceschini2025quanvnn"
-Warning--I didn't find a database entry for "cong2019qcnn"
 Warning--I didn't find a database entry for "zhuang2020adabelief"
+Warning--I didn't find a database entry for "ceschini2025quanvnn"
+Warning--I didn't find a database entry for "fan2024hybrid"
 -- IEEEtran.bst version 1.14 (2015/08/26) by Michael Shell.
 -- http://www.michaelshell.org/tex/ieeetran/bibtex/
 -- See the "IEEEtran_bst_HOWTO.pdf" manual for usage information.
@@ -35,7 +34,7 @@ Warning--I didn't find a database entry for "zhuang2020adabelief"
 Done.
 You've used 0 entries,
             4087 wiz_defined-function locations,
-            839 strings with 7584 characters,
+            838 strings with 7652 characters,
 and the built_in function-call counts, 104 in all, are:
 = -- 0
 > -- 0

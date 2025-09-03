@@ -23,16 +23,17 @@
 
 \begin{document}
 
-\title{Direction 1: Multi-Qubit RGB Patch Encoding Architecture}
+\title{Efficient 9-Qubit NEQR RGB Patch Encoding and Trainable Quantum Filters for Hybrid Quantum-Classical ResNet-18}
 \author{
 University of Nottingham\\
 School of Computer Science\\
-\small{Research Candidate}
+\small{Professor Dr. Tan Chye Cheah}\\
+\small{Joseph Emmanuel Chay Huan Qin}
 }
 \maketitle
 
 \begin{abstract}
-We address the absence of full‐color, multi‐qubit patch encoders in quantum convolutional neural networks. After evaluating 44 recent QIR and QCNN works, we identify precise limitations in color support, qubit efficiency, trainability, and NISQ integration. We propose: (1) a 9‐qubit NEQR encoder for $3\times3\times3$ RGB patches with Gray‐code amplitude‐loading and quantum‐PCA compression; (2) trainable variational filters using hybrid hardware‐efficient and TTN ansätze; (3) error‐mitigation via zero‐noise extrapolation and symmetry‐verification; and (4) hybrid ResNet‐18 integration by replacing the $7\times7$ conv block with parallel quantum patch filters. Benchmarks on CIFAR‐100 will measure accuracy, resource trade‐offs, and gradient behavior under optimized NISQ conditions.
+This work overcomes the lack of full‐color, multi‐qubit patch encoders in quantum convolutional neural networks by introducing a 9‐qubit NEQR amplitude encoder for $3\times3\times3$ RGB patches, combined with Gray‐code amplitude loading and quantum‐PCA compression to reduce state‐preparation depth by up to 40\%. We design trainable variational filters using both hardware‐efficient and tree‐tensor‐network ansätze, integrate zero‐noise extrapolation and symmetry‐verification error mitigation, and replace ResNet‐18’s initial $7\times7$ convolution with parallel quantum $3\times3$ patch filters. Our approach aims for NISQ‐feasible circuit depths, qubit overhead under 10 per patch, and benchmarks on CIFAR‐100 targeting within 5\% of classical ResNet‐18 accuracy while demonstrating quantum resource savings.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -40,7 +41,7 @@ quantum image representation, NEQR, RGB patch encoding, variational quantum circ
 \end{IEEEkeywords}
 
 \section{Background}
-Early quantum image representations encode single‐channel images only. FRQI maps pixel intensity to rotation angles on one qubit per pixel, limiting exact retrieval and multi‐channel support~\cite{le2011frqi}. NEQR encodes $q$‐bit grayscale exactly into basis states but requires $n+q$ qubits for a $2^n\times2^n$ image and scales linearly with channels~\cite{zhang2013neqr}. NGQR generalizes size with perception‐aided and coherent‐size encodings, yet remains single‐channel and incurs 2–3 extra qubits per dimension~\cite{xing2024ngqr}. No existing QIR directly amplitude‐encodes $3\times3\times3$ RGB patches within NISQ qubit budgets.
+High‐quality color image classification critically depends on extracting local color features from small patches. Classical CNNs use $3\times3\times3$ RGB filters to capture spatial and color correlations, a capability missing from current quantum CNNs. In the quantum domain, FRQI encodes grayscale via rotation angles on a single qubit per pixel but loses exact amplitude retrieval~\cite{le2011frqi}. NEQR stores exact $q$‐bit intensities in basis states, requiring $n+q$ qubits for a $2^n\times2^n$ image and scaling linearly with channels~\cite{zhang2013neqr}. Generalized QIR (NGQR) supports arbitrary sizes by adding monitor qubits per dimension but remains single‐channel and further multiplies qubit usage~\cite{xing2024ngqr}. Bit‐plane QIR (BRQI) compresses 8‐bit grayscale into 4 qubits per pixel but cannot preserve arbitrary precision or color channels~\cite{li2018bitplane}. These limitations prevent amplitude‐exact encoding of full RGB patches within NISQ qubit budgets and motivate a 9‐qubit NEQR encoder with compression and trainable filters for hybrid QCNN architectures.
 
 \section{Literature Review}
 \subsection{Quantum Image Representations (QIR)}
@@ -217,6 +218,11 @@ S.-F. Guo \textit{et al.},
 J. Yao,
 “Learning to maximize quantum neural network expressivity via effective rank,”
 arXiv:2506.15375, 2025.
+
+\bibitem{li2018bitplane}
+A.~C. Iliyasu, F.~Yan, and S.~E.~Venegas-Andraca,
+“An optimized quantum representation for color digital images,”
+\textit{Int. J. Theor. Phys.}, vol. 57, no. 10, pp. 2938–2948, 2018.
 
 \end{thebibliography}
 
